@@ -1,6 +1,6 @@
 PROJECT_ID = storybook-take-1
 ZONE=us-central1-a
-
+PYTHON := C:\Users\HP\AppData\Local\Microsoft\WindowsApps\python.exe
 
 run-local:
 	docker-compose up
@@ -84,9 +84,9 @@ deploy:
 			--restart=unless-stopped \
 			-p 80:3000 \
 			-e PORT=3000 \
-			-e "MONGO_URI=mongodb+srv://storybooks-user-(ENV):$(call get-secret,atlas_user_password_$(ENV))@storybooks-(ENV).bgnfej6.mongodb.net/$(DB_NAME)?retryWrites=true&w=majority" \
-			-e GOOGLE_CLIENT_ID=$(OAUTH_CLIENT_ID) \
-			-e GOOGLE_CLIENT_SECRET=$(call get-secret,google_oauth_client_secret) \
+			-e "MONGO_URI=mongodb+srv://storybooks-user-$(ENV):$(call get-secret,atlas_user_password_$(ENV))@storybooks-$(ENV).bgnfej6.mongodb.net/$(DB_NAME)?retryWrites=true&w=majority" \
+			-e GOOGLE_CLIENT_ID=$(call get-secret,client_secret) \
+			-e GOOGLE_CLIENT_SECRET=$(call get-secret,client_secret) \
 			$(REMOTE_TAG) \
 			'	
 dockerdeploycommand='\
@@ -95,8 +95,8 @@ dockerdeploycommand='\
 			-p 80:3000 \
 			-e PORT=3000 \
 			-e \"MONGO_URI=mongodb+srv://storybooks-user-(ENV):$(call get-secret,atlas_user_password_$(ENV))@storybooks-(ENV).bgnfej6.mongodb.net/$(DB_NAME)?retryWrites=true&w=majority\" \
-			-e GOOGLE_CLIENT_ID=$(OAUTH_CLIENT_ID) \
-			-e GOOGLE_CLIENT_SECRET=$(call get-secret,google_oauth_client_secret) \
+			-e GOOGLE_CLIENT_ID=$(call get-secret,client_id) \
+			-e GOOGLE_CLIENT_SECRET=$(call get-secret,client_secret) \
 			$(REMOTE_TAG) \
 			'
 
