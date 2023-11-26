@@ -94,7 +94,7 @@ dockerdeploycommand='\
 			--restart=unless-stopped \
 			-p 80:3000 \
 			-e PORT=3000 \
-			-e MONGO_URI=mongodb+srv://storybooks-user-(ENV):$(call get-secret,atlas_user_password_$(ENV))@storybooks-(ENV).bgnfej6.mongodb.net/$(DB_NAME)?retryWrites=true&w=majority \
+			-e \"MONGO_URI=mongodb+srv://storybooks-user-(ENV):$(call get-secret,atlas_user_password_$(ENV))@storybooks-(ENV).bgnfej6.mongodb.net/$(DB_NAME)?retryWrites=true&w=majority\" \
 			-e GOOGLE_CLIENT_ID=$(OAUTH_CLIENT_ID) \
 			-e GOOGLE_CLIENT_SECRET=$(call get-secret,google_oauth_client_secret) \
 			$(REMOTE_TAG) \
