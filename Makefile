@@ -1,6 +1,6 @@
 PROJECT_ID = storybook-take-1
 ZONE=us-central1-a
-PYTHON := C:\Users\HP\AppData\Local\Microsoft\WindowsApps\python.exe
+
 
 run-local:
 	docker-compose up
