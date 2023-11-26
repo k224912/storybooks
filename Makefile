@@ -48,6 +48,16 @@ REMOTE_TAG=gcr.io/$(PROJECT_ID)/$(LOCAL_TAG)
 
 CONTAINER_NAME=storybooks-api
 DB_NAME=storybooks
+dockerdeploycommand='\
+		docker run -d --name=$(CONTAINER_NAME) \
+			--restart=unless-stopped \
+			-p 80:3000 \
+			-e PORT=3000 \
+			-e \"MONGO_URI=mongodb+srv://storybooks-user-(ENV):$(call get-secret,atlas_user_password_$(ENV))@storybooks-(ENV).bgnfej6.mongodb.net/$(DB_NAME)?retryWrites=true&w=majority\" \
+			-e GOOGLE_CLIENT_ID=$(call get-secret,client_id) \
+			-e GOOGLE_CLIENT_SECRET=$(call get-secret,client_secret) \
+			$(REMOTE_TAG) \
+			'
 
 
 
@@ -84,21 +94,12 @@ deploy:
 			--restart=unless-stopped \
 			-p 80:3000 \
 			-e PORT=3000 \
-			-e "MONGO_URI=mongodb+srv://storybooks-user-$(ENV):$(call get-secret,atlas_user_password_$(ENV))@storybooks-$(ENV).bgnfej6.mongodb.net/$(DB_NAME)?retryWrites=true&w=majority" \
+			-e \"MONGO_URI=mongodb+srv://storybooks-user-$(ENV):$(call get-secret,atlas_user_password_$(ENV))@storybooks-$(ENV).bgnfej6.mongodb.net/$(DB_NAME)?retryWrites=true&w=majority\" \
 			-e GOOGLE_CLIENT_ID=$(call get-secret,client_secret) \
 			-e GOOGLE_CLIENT_SECRET=$(call get-secret,client_secret) \
 			$(REMOTE_TAG) \
 			'	
-dockerdeploycommand='\
-		docker run -d --name=$(CONTAINER_NAME) \
-			--restart=unless-stopped \
-			-p 80:3000 \
-			-e PORT=3000 \
-			-e \"MONGO_URI=mongodb+srv://storybooks-user-(ENV):$(call get-secret,atlas_user_password_$(ENV))@storybooks-(ENV).bgnfej6.mongodb.net/$(DB_NAME)?retryWrites=true&w=majority\" \
-			-e GOOGLE_CLIENT_ID=$(call get-secret,client_id) \
-			-e GOOGLE_CLIENT_SECRET=$(call get-secret,client_secret) \
-			$(REMOTE_TAG) \
-			'
+
 
 deploy2:
 	@$(MAKE) ssh-cmd CMD=$(dockerdeploycommand)
