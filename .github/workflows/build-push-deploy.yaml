@@ -21,7 +21,7 @@ jobs:
           if [ ${GITHUB_REF##*/} = "master" ]; then
             echo "ENV=staging" >> $GITHUB_ENV
           else 
-            echo "ENV=prod" >> $GITHUB_ENV
+            echo "ENV=production" >> $GITHUB_ENV
           fi
 
       - name: Checkout
