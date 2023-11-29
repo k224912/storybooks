@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - master
+  tags:
+    - v\d+\.\d+\.\d+
 
 env:
   PROJECT_ID: storybook-take-1

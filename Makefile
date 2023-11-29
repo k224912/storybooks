@@ -1,6 +1,5 @@
 PROJECT_ID = storybook-take-1
 ZONE=us-central1-a
-PYTHON := C:\Users\HP\AppData\Local\Microsoft\WindowsApps\
 
 run-local:
 	docker-compose up
@@ -15,18 +14,17 @@ $(shell gcloud secrets versions access latest --secret=$(1) --project=$(PROJECT_
 endef
 
 ###
-ENV=staging
-terraform-create-workspace:
+terraform-create-workspace:check-env
 	cd terraform && \
 		terraform workspace new $(ENV)
 
-terraform-init:
+terraform-init:check-env
 	cd terraform && \
 		terraform workspace select $(ENV) && \
 		terraform init
 
 TF_ACTION?=plan
-terraform-action: 
+terraform-action:check-env 
 	@cd terraform && \
 		terraform workspace select $(ENV) && \
 		terraform $(TF_ACTION) \
@@ -42,46 +40,45 @@ terraform-action:
 ###
 SSH_STRING=HP@storybooks-vm-$(ENV)
 
+check-env:
+ifndef ENV
+	$(error ENV is undefined)
+endif
+
+
 GITHUB_SHA?=latest
 LOCAL_TAG=storybooks-app:$(GITHUB_SHA)
 REMOTE_TAG=gcr.io/$(PROJECT_ID)/$(LOCAL_TAG)
 
 CONTAINER_NAME=storybooks-api
-DB_NAME=storybooks
-dockerdeploycommand='\
-		docker run -d --name=$(CONTAINER_NAME) \
-			--restart=unless-stopped \
-			-p 80:3000 \
-			-e PORT=3000 \
-			-e \"MONGO_URI=mongodb+srv://storybooks-user-(ENV):$(call get-secret,atlas_user_password_$(ENV))@storybooks-(ENV).bgnfej6.mongodb.net/$(DB_NAME)?retryWrites=true&w=majority\" \
-			-e GOOGLE_CLIENT_ID=$(call get-secret,client_id) \
-			-e GOOGLE_CLIENT_SECRET=$(call get-secret,client_secret) \
-			$(REMOTE_TAG) \
-			'
 
 
 
-ssh:
+
+ssh:check-env
 	gcloud compute ssh $(SSH_STRING)\
 		--project=$(PROJECT_ID) \
 		--zone=$(ZONE)
 
-ssh-cmd:
+ssh-cmd:check-env
 	@gcloud compute ssh $(SSH_STRING)\
 		--project=$(PROJECT_ID) \
 		--zone=$(ZONE)\
 		--command="$(CMD)"
+
+
+
 #building the docker image before pushing it to the registry
 build:
 	docker build -t $(LOCAL_TAG) .
-
-
 
 push:
 	docker tag $(LOCAL_TAG) $(REMOTE_TAG)
 	docker push $(REMOTE_TAG) 
 
-deploy: 
+
+
+deploy:check-env
 	$(MAKE) ssh-cmd CMD='docker-credential-gcr configure-docker'
 	@echo "pulling new container image..."
 	$(MAKE) ssh-cmd CMD='docker pull $(REMOTE_TAG)'
@@ -89,18 +86,28 @@ deploy:
 	-$(MAKE) ssh-cmd CMD='docker container stop $(CONTAINER_NAME)'
 	-$(MAKE) ssh-cmd CMD='docker container rm $(CONTAINER_NAME)'
 	@echo "starting new container..."
+ifeq ($(ENV), staging)
 	@$(MAKE) ssh-cmd CMD='\
 		docker run -d --name=$(CONTAINER_NAME) \
 			--restart=unless-stopped \
 			-p 80:3000 \
 			-e PORT=3000 \
-			-e \"MONGO_URI=mongodb+srv://storybooks-user-$(ENV):$(call get-secret,atlas_user_password_$(ENV))@storybooks-$(ENV).bgnfej6.mongodb.net/$(DB_NAME)?retryWrites=true&w=majority\" \
-			-e GOOGLE_CLIENT_ID=$(call get-secret,client_secret) \
+			-e \"MONGO_URI=mongodb+srv://admin:$(call get-secret,atlas_user_password_$(ENV))@storybooks-$(ENV).7zok6dz.mongodb.net/?retryWrites=true&w=majority\" \
+			-e GOOGLE_CLIENT_ID=$(call get-secret,client_id) \
 			-e GOOGLE_CLIENT_SECRET=$(call get-secret,client_secret) \
 			$(REMOTE_TAG) \
-			'	
+			'
+else
+	@$(MAKE) ssh-cmd CMD='\
+		docker run -d --name=$(CONTAINER_NAME) \
+			--restart=unless-stopped \
+			-p 80:3000 \
+			-e PORT=3000 \
+			-e \"MONGO_URI=mongodb+srv://production:$(call get-secret,atlas_user_password_$(ENV))@storybooks-$(ENV).vzatk8f.mongodb.net/?retryWrites=true&w=majority\" \
+			-e GOOGLE_CLIENT_ID=$(call get-secret,client_id) \
+			-e GOOGLE_CLIENT_SECRET=$(call get-secret,client_secret) \
+			$(REMOTE_TAG) \
+			'
+endif
 
-
-deploy2:
-	@$(MAKE) ssh-cmd CMD=$(dockerdeploycommand)
 
