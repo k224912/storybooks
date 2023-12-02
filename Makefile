@@ -23,14 +23,55 @@ terraform-init:check-env
 		terraform workspace select $(ENV) && \
 		terraform init
 
+terraform-refresh:check-env
+	cd terraform && \
+		terraform workspace select $(ENV) && \
+		terraform refresh\
+		-var-file="./environments/common.tfvars" \
+		-var-file="./environments/$(ENV)/config.tfvars"\
+		-var="mongodbatlas_private_key=$(call get-secret,mongodbatlas_$(ENV)_privatekey)" \
+		-var="mongodbatlas_public_key=$(call get-secret,mongodbatlas_$(ENV)_publickey)" \
+		-var="atlas_user_password=$(call get-secret,atlas_user_password_$(ENV))" \
+		-var="cloudflare_api_token=$(call get-secret,cloudflare_api_token)"
+
+terraform-state:check-env
+	cd terraform && \
+		terraform workspace select $(ENV) && \
+		terraform state list
+
+terraform-destroy:check-env
+	cd terraform && \
+		terraform workspace select $(ENV) && \
+		terraform destroy -target=cloudflare_record.dns_record\
+		-var-file="./environments/common.tfvars" \
+		-var-file="./environments/$(ENV)/config.tfvars"\
+		-var="mongodbatlas_private_key=$(call get-secret,mongodbatlas_$(ENV)_privatekey)" \
+		-var="mongodbatlas_public_key=$(call get-secret,mongodbatlas_$(ENV)_publickey)" \
+		-var="atlas_user_password=$(call get-secret,atlas_user_password_$(ENV))" \
+		-var="cloudflare_api_token=$(call get-secret,cloudflare_api_token)"
+
+
 TF_ACTION?=plan
-terraform-action:check-env 
+terraform-action:check-env
 	@cd terraform && \
 		terraform workspace select $(ENV) && \
 		terraform $(TF_ACTION) \
 		-var-file="./environments/common.tfvars" \
 		-var-file="./environments/$(ENV)/config.tfvars"\
-		-var="mongodbatlas_private_key=$(call get-secret,mongodbatlas_private_key)" \
+		-var="mongodbatlas_private_key=$(call get-secret,mongodbatlas_$(ENV)_privatekey)" \
+		-var="mongodbatlas_public_key=$(call get-secret,mongodbatlas_$(ENV)_publickey)" \
+		-var="atlas_user_password=$(call get-secret,atlas_user_password_$(ENV))" \
+		-var="cloudflare_api_token=$(call get-secret,cloudflare_api_token)"
+
+
+terraform-force-unlock:check-env
+	@cd terraform && \
+		terraform workspace select $(ENV) && \
+		terraform force-unlock $(LOCK_ID) \
+		-var-file="./environments/common.tfvars" \
+		-var-file="./environments/$(ENV)/config.tfvars"\
+		-var="mongodbatlas_private_key=$(call get-secret,mongodbatlas_$(ENV)_privatekey)" \
+		-var="mongodbatlas_public_key=$(call get-secret,mongodbatlas_$(ENV)_publickey)" \
 		-var="atlas_user_password=$(call get-secret,atlas_user_password_$(ENV))" \
 		-var="cloudflare_api_token=$(call get-secret,cloudflare_api_token)"\
 		-var="cloudflare_zone_id=$(call get-secret,cloudflare_zone_id)"

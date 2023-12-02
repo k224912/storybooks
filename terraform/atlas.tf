@@ -56,9 +56,10 @@ terraform {
 #   }
 # }
 
-# #ip whitelist 
-# #allows our machine to communicte with cluster
-# resource "mongodbatlas_project_ip_access_list" "test" {
+#ip whitelist 
+#allows our machine to communicte with cluster
+
+# resource "mongodbatlas_project_ip_access_list" "testing" {
 #   project_id = var.atlas_project_id
 #   ip_address = google_compute_address.ip_address.address
 #   comment    = "ip address for tf acc testing"

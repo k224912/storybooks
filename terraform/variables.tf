@@ -1,8 +1,8 @@
 ### GENERAL
 variable "app_name" {
-  type = string
+  type    = string
+  default = "storybooks"
 }
-
 ### ATLAS
 variable "atlas_project_id" {
   type = string
@@ -17,9 +17,14 @@ variable "mongodbatlas_private_key" {
   type = string
 }
 
+
+
+
 variable "atlas_user_password" {
   type = string
 }
+
+
 
 
 
@@ -33,9 +38,9 @@ variable "cloudflare_api_token" {
   type = string
 }
 
-variable "cloudflare_zone_id" {
-  type = string
-}
+# variable "cloudflare_zone_id" {
+#   type = string
+# }
 
 variable "cloudflare_domain" {
   type = string
