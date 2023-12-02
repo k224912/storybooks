@@ -31,9 +31,9 @@ terraform-refresh:check-env
 		-var-file="./environments/$(ENV)/config.tfvars"\
 		-var="mongodbatlas_private_key=$(call get-secret,mongodbatlas_$(ENV)_privatekey)" \
 		-var="mongodbatlas_public_key=$(call get-secret,mongodbatlas_$(ENV)_publickey)" \
-		-var="atlas_user_password=$(call get-secret,atlas_user_password_$(ENV))" \
-		-var="cloudflare_api_token=$(call get-secret,cloudflare_api_token)"
+		-var="atlas_user_password=$(call get-secret,atlas_user_password_$(ENV))" 
 
+		
 terraform-state:check-env
 	cd terraform && \
 		terraform workspace select $(ENV) && \
@@ -72,8 +72,9 @@ terraform-force-unlock:check-env
 		-var-file="./environments/$(ENV)/config.tfvars"\
 		-var="mongodbatlas_private_key=$(call get-secret,mongodbatlas_$(ENV)_privatekey)" \
 		-var="mongodbatlas_public_key=$(call get-secret,mongodbatlas_$(ENV)_publickey)" \
-		-var="atlas_user_password=$(call get-secret,atlas_user_password_$(ENV))" \
-		-var="cloudflare_api_token=$(call get-secret,cloudflare_api_token)"\
+		-var="atlas_user_password=$(call get-secret,atlas_user_password_$(ENV))" 
+
+		
 		-var="cloudflare_zone_id=$(call get-secret,cloudflare_zone_id)"
 
 
